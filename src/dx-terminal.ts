@@ -146,7 +146,7 @@ export function handlePaymentRecipientUpdated(
 function getDay(timestamp: BigInt): string {
   let timestampSeconds = timestamp.toI32();
   let date = new Date(timestampSeconds * 1000); // 转换为毫秒
-  return date.toISOString().slice(0, 10).replace("-", ""); // 输出 YYYYMMDD
+  return date.toISOString().slice(0, 10).replaceAll("-", ""); // 输出 YYYYMMDD
 }
 
 export function handleTransfer(event: TransferEvent): void {
