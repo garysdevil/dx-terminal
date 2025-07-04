@@ -25,6 +25,7 @@ dataSources:
         - OwnershipTransferred
         - PaymentRecipientUpdated
         - Transfer
+        - GlobalTransferCount
       abis:
         - name: DXTerminal
           file: ./abis/DXTerminal.json

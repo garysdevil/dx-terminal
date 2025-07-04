@@ -18,8 +18,10 @@ import {
   MintingPeriodScheduled,
   OwnershipTransferred,
   PaymentRecipientUpdated,
-  Transfer
+  Transfer,
+  GlobalTransferCount
 } from "../generated/schema"
+import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 
 export function handleApproval(event: ApprovalEvent): void {
   let entity = new Approval(
@@ -140,6 +142,13 @@ export function handlePaymentRecipientUpdated(
   entity.save()
 }
 
+// 将时间戳转换为日期（YYYYMMDD 格式）
+function getDay(timestamp: BigInt): string {
+  let timestampSeconds = timestamp.toI32();
+  let date = new Date(timestampSeconds * 1000); // 转换为毫秒
+  return date.toISOString().slice(0, 10).replace("-", ""); // 输出 YYYYMMDD
+}
+
 export function handleTransfer(event: TransferEvent): void {
   let entity = new Transfer(
     event.transaction.hash.concatI32(event.logIndex.toI32())
@@ -153,4 +162,24 @@ export function handleTransfer(event: TransferEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
+
+  // 计算日期（例如 20250702）
+  let day = getDay(event.block.timestamp);
+  let entityId = `global-${day}`; // 例如 "global-20250702"
+
+  // 更新 GlobalTransferCount 实体
+  let globalTransferCount = GlobalTransferCount.load(entityId);
+
+  if (globalTransferCount == null) {
+    // 如果实体不存在，创建新实体
+    globalTransferCount = new GlobalTransferCount(entityId);
+    globalTransferCount.count = BigInt.fromI32(1); // 初始计数为 1
+    globalTransferCount.lastUpdated = event.block.timestamp;
+  } else {
+    // 如果实体存在，增加计数
+    globalTransferCount.count = globalTransferCount.count.plus(BigInt.fromI32(1));
+    globalTransferCount.lastUpdated = event.block.timestamp;
+  }
+
+  globalTransferCount.save();
 }

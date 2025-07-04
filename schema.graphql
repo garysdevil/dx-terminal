@@ -80,3 +80,8 @@ type Transfer @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
+type GlobalTransferCount @entity(immutable: false) {
+  id: ID! # 例如: "global" 或 "global-YYYYMMDD"（按天分段）
+  count: BigInt! # 所有NFT的转移次数
+  lastUpdated: BigInt! # 最后更新的时间戳
+}
